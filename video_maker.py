@@ -151,7 +151,8 @@ def _run_ffmpeg(args: list[str]) -> None:
         raise RuntimeError(detail[-1] if detail else "ffmpeg failed")
 
 
-def _voiceover(text: str, wav_path: Path) -> None:
+def _voiceover_windows(text: str, wav_path: Path) -> None:
+    """Local Windows SAPI (offline). Does not work on Linux / Vercel."""
     script_path = wav_path.with_suffix(".txt")
     script_path.write_text(text, encoding="utf-8-sig")
     command = r"""
@@ -180,6 +181,73 @@ $synth.Dispose()
     if result.returncode != 0 or not wav_path.exists() or wav_path.stat().st_size < 128:
         detail = (result.stderr or result.stdout or "Voiceover failed").strip()
         raise RuntimeError(detail)
+
+
+def _voiceover_edge(text: str, wav_path: Path) -> None:
+    """Free online TTS via edge-tts — works on Linux / Vercel."""
+    import asyncio
+
+    try:
+        import edge_tts
+    except ImportError as error:
+        raise RuntimeError("edge-tts is not installed") from error
+
+    mp3_path = wav_path.with_suffix(".mp3")
+
+    async def _synthesize() -> None:
+        communicate = edge_tts.Communicate(text, "en-US-JennyNeural")
+        await communicate.save(str(mp3_path))
+
+    try:
+        asyncio.run(_synthesize())
+    except RuntimeError:
+        # Nested event loop (some hosts): run in a fresh loop thread-style.
+        loop = asyncio.new_event_loop()
+        try:
+            loop.run_until_complete(_synthesize())
+        finally:
+            loop.close()
+
+    if not mp3_path.exists() or mp3_path.stat().st_size < 64:
+        raise RuntimeError("edge-tts produced no audio")
+
+    _run_ffmpeg(
+        [
+            _ffmpeg(),
+            "-y",
+            "-i",
+            str(mp3_path),
+            "-acodec",
+            "pcm_s16le",
+            "-ac",
+            "1",
+            "-ar",
+            "22050",
+            str(wav_path),
+        ]
+    )
+    mp3_path.unlink(missing_ok=True)
+    if not wav_path.exists() or wav_path.stat().st_size < 128:
+        raise RuntimeError("Could not convert edge-tts audio to wav")
+
+
+def _voiceover(text: str, wav_path: Path) -> None:
+    errors: list[str] = []
+    if os.name == "nt":
+        try:
+            _voiceover_windows(text, wav_path)
+            return
+        except (OSError, RuntimeError, subprocess.TimeoutExpired) as error:
+            errors.append(f"Windows SAPI: {error}")
+            wav_path.unlink(missing_ok=True)
+    try:
+        _voiceover_edge(text, wav_path)
+        return
+    except (OSError, RuntimeError, subprocess.TimeoutExpired) as error:
+        errors.append(f"edge-tts: {error}")
+        wav_path.unlink(missing_ok=True)
+        wav_path.with_suffix(".mp3").unlink(missing_ok=True)
+    raise RuntimeError(" | ".join(errors) or "Voiceover failed")
 
 
 def _wav_seconds(path: Path) -> float:
@@ -608,11 +676,12 @@ def make_video(
             _voiceover(spoken_script, wav_path)
             audio_seconds = _wav_seconds(wav_path)
             spoken = wav_path
-        except (OSError, RuntimeError, wave.Error):
+        except (OSError, RuntimeError, wave.Error) as error:
             wav_path.unlink(missing_ok=True)
             spoken = None
             audio_seconds = None
-            on_progress("Voiceover skipped. Building the picture track…")
+            detail = str(error).strip().splitlines()[-1] if str(error).strip() else "unknown error"
+            on_progress(f"Voiceover skipped ({detail[:120]}). Building the picture track…")
 
     durations = _durations(scenes, audio_seconds)
     clips: list[Path] = []

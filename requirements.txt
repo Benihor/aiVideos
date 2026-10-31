@@ -3,4 +3,5 @@ pillow>=10.0
 imageio>=2.34
 imageio-ffmpeg>=0.5
 numpy>=1.26
+edge-tts>=6.1
 # Stock search uses the Python standard library HTTP client only.
