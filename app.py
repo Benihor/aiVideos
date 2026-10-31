@@ -207,6 +207,13 @@ def home():
     return render_template("index.html", providers=configured_providers())
 
 
+@app.get("/google5695cb5f1210e8c6.html")
+def google_site_verification():
+    """Google Search Console HTML-file ownership verification."""
+    path = ROOT / "google5695cb5f1210e8c6.html"
+    return send_file(path, mimetype="text/html")
+
+
 @app.get("/api/providers")
 def providers():
     return jsonify(configured_providers())
