@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import threading
 import uuid
@@ -23,8 +24,15 @@ from stock_media import (
 from video_maker import make_video
 
 ROOT = Path(__file__).resolve().parent
-OUTPUT = ROOT / "outputs"
-OUTPUT.mkdir(exist_ok=True)
+# Vercel’s filesystem is read-only except /tmp — writing outputs/ next to the app crashes the function.
+ON_VERCEL = bool(os.environ.get("VERCEL") or os.environ.get("VERCEL_ENV"))
+OUTPUT = Path(os.environ.get("TMPDIR") or os.environ.get("TEMP") or "/tmp") / "autovideo-outputs" if ON_VERCEL else ROOT / "outputs"
+try:
+    OUTPUT.mkdir(parents=True, exist_ok=True)
+except OSError:
+    OUTPUT = Path("/tmp") / "autovideo-outputs"
+    OUTPUT.mkdir(parents=True, exist_ok=True)
+
 load_env_file(ROOT / ".env")
 
 app = Flask(__name__)
@@ -38,9 +46,49 @@ LOCK = threading.Lock()
 ALLOWED = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp"}
 
 
+def _job_status_path(job_id: str) -> Path:
+    return OUTPUT / job_id / "status.json"
+
+
+def _write_job(job_id: str, data: dict) -> None:
+    folder = OUTPUT / job_id
+    folder.mkdir(parents=True, exist_ok=True)
+    _job_status_path(job_id).write_text(json.dumps(data), encoding="utf-8")
+
+
+def _read_job(job_id: str) -> dict | None:
+    path = _job_status_path(job_id)
+    if not path.exists():
+        return None
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
 def _update(job_id: str, **fields) -> None:
     with LOCK:
+        if job_id not in JOBS:
+            JOBS[job_id] = _read_job(job_id) or {
+                "status": "working",
+                "message": "Starting…",
+                "error": None,
+                "attributions": [],
+            }
         JOBS[job_id].update(fields)
+        snapshot = dict(JOBS[job_id])
+    try:
+        _write_job(job_id, snapshot)
+    except OSError:
+        pass
+
+
+def _start_job(*args, **kwargs) -> None:
+    """Run video build in a background thread locally; on Vercel run inline (no workers)."""
+    if ON_VERCEL:
+        _run(*args, **kwargs)
+        return
+    threading.Thread(target=_run, args=args, kwargs=kwargs, daemon=True).start()
 
 
 def _public_draft(draft: dict) -> dict:
@@ -260,23 +308,28 @@ def generate():
         use_stock = bool(payload.get("use_stock", True))
         job_id = uuid.uuid4().hex[:12]
         (OUTPUT / job_id).mkdir(parents=True, exist_ok=True)
+        initial = {
+            "status": "working",
+            "message": "Starting…",
+            "error": None,
+            "attributions": [],
+        }
         with LOCK:
-            JOBS[job_id] = {
-                "status": "working",
-                "message": "Starting…",
-                "error": None,
-                "attributions": [],
-            }
-        threading.Thread(
-            target=_run,
-            args=(job_id, text, title, voice, [], [], []),
-            kwargs={
-                "auto_stock": use_stock and any(configured_providers().values()),
-                "captions": captions,
-            },
-            daemon=True,
-        ).start()
-        return jsonify(id=job_id)
+            JOBS[job_id] = dict(initial)
+        _write_job(job_id, initial)
+        _start_job(
+            job_id,
+            text,
+            title,
+            voice,
+            [],
+            [],
+            [],
+            auto_stock=use_stock and any(configured_providers().values()),
+            captions=captions,
+        )
+        job = _read_job(job_id) or JOBS.get(job_id) or initial
+        return jsonify(id=job_id, status=job.get("status"), message=job.get("message"), error=job.get("error"))
 
     text = (request.form.get("text") or "").strip()
     if not text:
@@ -303,24 +356,29 @@ def generate():
         upload.save(dest)
         images.append(dest)
 
+    initial = {
+        "status": "working",
+        "message": "Starting…",
+        "error": None,
+        "attributions": [],
+    }
     with LOCK:
-        JOBS[job_id] = {
-            "status": "working",
-            "message": "Starting…",
-            "error": None,
-            "attributions": [],
-        }
+        JOBS[job_id] = dict(initial)
+    _write_job(job_id, initial)
 
-    threading.Thread(
-        target=_run,
-        args=(job_id, text, title, voice, images, [], []),
-        kwargs={
-            "auto_stock": use_stock and not images and any(configured_providers().values()),
-            "captions": captions,
-        },
-        daemon=True,
-    ).start()
-    return jsonify(id=job_id)
+    _start_job(
+        job_id,
+        text,
+        title,
+        voice,
+        images,
+        [],
+        [],
+        auto_stock=use_stock and not images and any(configured_providers().values()),
+        captions=captions,
+    )
+    job = _read_job(job_id) or JOBS.get(job_id) or initial
+    return jsonify(id=job_id, status=job.get("status"), message=job.get("message"), error=job.get("error"))
 
 
 def _generate_from_draft(draft_id: str, payload: dict):
@@ -373,21 +431,34 @@ def _generate_from_draft(draft_id: str, payload: dict):
             }
         )
 
+    initial = {
+        "status": "working",
+        "message": "Downloading stock media into the timeline…",
+        "error": None,
+        "attributions": [],
+    }
     with LOCK:
-        JOBS[job_id] = {
-            "status": "working",
-            "message": "Downloading stock media into the timeline…",
-            "error": None,
-            "attributions": [],
-        }
+        JOBS[job_id] = dict(initial)
+    _write_job(job_id, initial)
 
-    threading.Thread(
-        target=_run,
-        args=(job_id, text, title, voice, [], scene_media, attribution_assets),
-        kwargs={"captions": captions},
-        daemon=True,
-    ).start()
-    return jsonify(id=job_id, draft_id=draft_id)
+    _start_job(
+        job_id,
+        text,
+        title,
+        voice,
+        [],
+        scene_media,
+        attribution_assets,
+        captions=captions,
+    )
+    job = _read_job(job_id) or JOBS.get(job_id) or initial
+    return jsonify(
+        id=job_id,
+        draft_id=draft_id,
+        status=job.get("status"),
+        message=job.get("message"),
+        error=job.get("error"),
+    )
 
 
 @app.get("/api/jobs/<job_id>")
@@ -396,6 +467,8 @@ def job_status(job_id: str):
         return jsonify(error="Unknown video."), 404
     with LOCK:
         job = JOBS.get(job_id)
+    if job is None:
+        job = _read_job(job_id)
     if job is None:
         film = OUTPUT / job_id / "film.mp4"
         if film.exists():

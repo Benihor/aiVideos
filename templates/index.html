@@ -818,6 +818,20 @@
         }
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || "Could not start the video.");
+        if (data.status === "done") {
+          statusBox.textContent = data.message || "Your video is ready.";
+          player.src = `/videos/${data.id}`;
+          player.style.display = "block";
+          empty.style.display = "none";
+          download.style.display = "inline-block";
+          download.href = `/videos/${data.id}`;
+          credits.style.display = "inline-block";
+          credits.href = `/videos/${data.id}/attributions`;
+          makeButton.disabled = false;
+          player.play().catch(() => {});
+          return;
+        }
+        if (data.status === "error") throw new Error(data.error || "The video didn't finish.");
         await poll(data.id);
       } catch (error) {
         fail(error);
