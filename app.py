@@ -214,6 +214,13 @@ def google_site_verification():
     return send_file(path, mimetype="text/html")
 
 
+@app.get("/ads.txt")
+def ads_txt():
+    """IAB ads.txt — authorizes Google AdSense to sell inventory on this site."""
+    path = ROOT / "ads.txt"
+    return send_file(path, mimetype="text/plain")
+
+
 @app.get("/api/providers")
 def providers():
     return jsonify(configured_providers())
