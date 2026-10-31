@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Text to Video Studio | Kids Entertainment, Stories &amp; Voiceover Maker</title>
+  <meta name="description" content="Free AI text to video and text to speech studio. Turn scripts into kids entertainment videos, bedtime stories, educational clips, YouTube Shorts, and social videos with captions, voiceover, and motion.">
+  <meta name="keywords" content="AI text to video, text to video, text to speech, TTS video, video studio, AI video maker, AI video studio, kids video maker, children's entertainment video, kids story video, bedtime story video, educational video for children, cartoon style slideshow, script to video, voiceover video, captioned video, stock photo video, social media video generator, YouTube Shorts maker, explainer video from text, AutoVideo Studio">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="http://127.0.0.1:7860/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="AutoVideo Studio | AI Text to Video &amp; Text to Speech">
+  <meta property="og:description" content="Create kids entertainment videos, stories, and explainers from text — with AI scene matching, captions, and voiceover.">
+  <meta property="og:url" content="http://127.0.0.1:7860/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="AutoVideo Studio | AI Text to Video Studio">
+  <meta name="twitter:description" content="AI text to video and text to speech for kids entertainment, stories, education, and social clips.">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "AutoVideo Studio",
+    "applicationCategory": "MultimediaApplication",
+    "operatingSystem": "Web",
+    "description": "AI text to video and text to speech studio for kids entertainment, children's stories, educational clips, and social videos. Splits scripts by subject, matches stock photos, adds captions, voiceover, and motion, then exports MP4.",
+    "keywords": "AI text to video, text to speech, video studio, kids entertainment video, children's video maker, bedtime story video, educational video",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "featureList": [
+      "AI text to video conversion",
+      "Text to speech voiceover",
+      "Kids entertainment and story videos",
+      "On-screen caption boxes",
+      "Automatic subject-based scene splitting",
+      "Stock photo matching",
+      "Ken Burns motion and transitions",
+      "MP4 download"
+    ]
+  }
+  </script>
+  <style>
+    :root {
+      --ink: #1c1915;
+      --muted: #6f675e;
+      --paper: #efeae2;
+      --card: #f7f4ee;
+      --line: #ddd4c6;
+      --accent: #c4552a;
+      --accent-dark: #9a3e1c;
+      --stage: #1c1915;
+      --ok: #2f6b4f;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(196, 85, 42, 0.14), transparent 32rem),
+        var(--paper);
+      font-family: "Segoe UI", sans-serif;
+    }
+
+    main {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 36px 0 64px;
+    }
+
+    header { margin-bottom: 28px; }
+
+    .mark {
+      margin: 0 0 8px;
+      font-size: 13px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 18ch;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: clamp(40px, 6vw, 64px);
+      font-weight: 700;
+      line-height: 0.95;
+      letter-spacing: -0.03em;
+    }
+
+    .lede {
+      max-width: 46rem;
+      margin: 16px 0 0;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.45;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 22px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 650;
+    }
+
+    .hint {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    input[type="text"], textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fffdf9;
+      color: var(--ink);
+      font: inherit;
+      padding: 12px 14px;
+    }
+
+    textarea {
+      min-height: 160px;
+      resize: vertical;
+      line-height: 1.45;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 18px;
+    }
+
+    input:focus, textarea:focus {
+      outline: 2px solid rgba(196, 85, 42, 0.35);
+      border-color: var(--accent);
+    }
+
+    .field { margin-bottom: 18px; }
+
+    .drop {
+      border: 1.5px dashed #c9beae;
+      border-radius: 16px;
+      padding: 16px;
+      background: #fffdf9;
+    }
+
+    .drop.over { border-color: var(--accent); background: #fff6f1; }
+
+    .drop-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .browse, button.secondary {
+      border: 0;
+      background: var(--ink);
+      color: var(--paper);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font: inherit;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    button.secondary {
+      background: #fffdf9;
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+
+    .thumbs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .thumb {
+      position: relative;
+      width: 74px;
+      height: 74px;
+    }
+
+    .thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+
+    .thumb button {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 22px;
+      height: 22px;
+      border: 0;
+      border-radius: 50%;
+      background: rgba(28, 25, 21, 0.86);
+      color: white;
+      cursor: pointer;
+    }
+
+    .checks {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 16px 22px;
+      margin: 0;
+      font-size: 15px;
+    }
+
+    .checks label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+      font-weight: 550;
+      cursor: pointer;
+    }
+
+    .checks input {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--accent);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .create-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin: 12px 0 20px;
+    }
+
+    .create-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      margin-left: auto;
+    }
+
+    button.primary {
+      border: 0;
+      border-radius: 999px;
+      background: var(--accent);
+      color: #fffaf6;
+      padding: 14px 22px;
+      font: inherit;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button.primary:hover { background: var(--accent-dark); }
+    button.primary:disabled, button.secondary:disabled { opacity: 0.65; cursor: wait; }
+
+    button.quiet {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font: inherit;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .error {
+      display: none;
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: #f8e4dc;
+      color: #6d2b16;
+    }
+
+    .provider-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .pill {
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      border: 1px solid var(--line);
+      background: #fffdf9;
+      color: var(--muted);
+    }
+
+    .pill.on {
+      border-color: #b7d7c5;
+      background: #e8f5ee;
+      color: var(--ok);
+    }
+
+    .stage-wrap { position: sticky; top: 18px; }
+
+    .stage {
+      position: relative;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      border-radius: 18px;
+      background: var(--stage);
+      color: #f3ecdf;
+    }
+
+    .stage video, .empty {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .stage video { display: none; background: black; }
+
+    .empty {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 22px;
+    }
+
+    .empty strong {
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1.05;
+    }
+
+    .empty span {
+      margin-top: 8px;
+      color: #c9bfb2;
+      max-width: 32ch;
+    }
+
+    .status {
+      min-height: 1.4em;
+      margin: 14px 0 0;
+      color: var(--muted);
+    }
+
+    .download, .credits-link {
+      display: none;
+      margin-top: 12px;
+      margin-right: 14px;
+      color: var(--accent-dark);
+      font-weight: 700;
+    }
+
+    .stock-panel {
+      display: none;
+      margin-top: 22px;
+    }
+
+    .stock-panel.visible { display: block; }
+
+    .stock-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: baseline;
+      margin-bottom: 14px;
+    }
+
+    .stock-header h2 {
+      margin: 0;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 28px;
+    }
+
+    .scene-card {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fffdf9;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    .scene-top {
+      display: grid;
+      grid-template-columns: 160px minmax(0, 1fr);
+      gap: 14px;
+      margin-bottom: 12px;
+    }
+
+    .selected-preview {
+      position: relative;
+      aspect-ratio: 16 / 9;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #1c1915;
+    }
+
+    .selected-preview img, .selected-preview video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .badge {
+      position: absolute;
+      left: 8px;
+      top: 8px;
+      border-radius: 999px;
+      padding: 4px 8px;
+      background: rgba(28, 25, 21, 0.82);
+      color: white;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .scene-copy h3 {
+      margin: 0 0 6px;
+      font-size: 15px;
+    }
+
+    .scene-copy p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .keywords {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .keywords span {
+      border-radius: 999px;
+      background: #efe8dc;
+      padding: 4px 8px;
+      font-size: 12px;
+    }
+
+    .credit {
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .credit a { color: var(--accent-dark); }
+
+    .candidates {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 10px;
+    }
+
+    .candidate {
+      border: 2px solid transparent;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #efe8dc;
+      cursor: pointer;
+      padding: 0;
+      text-align: left;
+    }
+
+    .candidate.selected { border-color: var(--accent); }
+
+    .candidate img, .candidate video {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      display: block;
+      background: #1c1915;
+    }
+
+    .candidate figcaption {
+      padding: 7px 8px 9px;
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.3;
+    }
+
+    .seo {
+      margin-top: 48px;
+      display: grid;
+      gap: 22px;
+    }
+
+    .seo article {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 26px 28px;
+    }
+
+    .seo h2 {
+      margin: 0 0 12px;
+      font-family: Georgia, "Palatino Linotype", Palatino, serif;
+      font-size: 28px;
+      line-height: 1.15;
+    }
+
+    .seo h3 {
+      margin: 18px 0 8px;
+      font-size: 18px;
+    }
+
+    .seo p, .seo li {
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 16px;
+    }
+
+    .seo ul {
+      margin: 8px 0 0;
+      padding-left: 1.2rem;
+    }
+
+    .site-footer {
+      margin-top: 28px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      .stage-wrap { position: static; }
+      .scene-top { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="mark">AutoVideo Studio</p>
+      <h1>Write it. Get a video.</h1>
+      <p class="lede">Type your script and press Create video. Stock photos are matched automatically, then the film is built with voiceover and motion.</p>
+    </header>
+
+    <div class="layout">
+      <section class="panel">
+        <form id="form">
+          <div class="field">
+            <label for="title">Title <span style="font-weight:500;color:var(--muted)">(optional)</span></label>
+            <input id="title" name="title" type="text" maxlength="80" placeholder="The paper boat">
+          </div>
+
+          <div class="field">
+            <label for="text">What should the video say?</label>
+            <textarea id="text" name="text" maxlength="4000" placeholder="A small paper boat leaves the harbor at sunrise. It passes a lighthouse, then a sleeping whale. By night it knows the way home." required></textarea>
+          </div>
+
+          <div class="create-row">
+            <div class="checks">
+              <label>
+                <input id="captions" name="captions" type="checkbox" value="on" checked>
+                Show text on screen
+              </label>
+              <label>
+                <input id="voice" name="voice" type="checkbox" value="on" checked>
+                Read aloud
+              </label>
+            </div>
+            <div class="create-actions">
+              <button class="quiet" id="example" type="button">Use an example</button>
+              <button class="primary" id="make" type="submit">Create video</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="images">Your own pictures <span style="font-weight:500;color:var(--muted)">(optional override)</span></label>
+            <div class="drop" id="drop">
+              <div class="drop-row">
+                <div>
+                  <strong>Drop images here</strong>
+                  <p class="hint">Optional. If you add your own pictures, those are used instead of stock.</p>
+                </div>
+                <button class="browse" type="button" id="browse">Browse</button>
+              </div>
+              <div class="thumbs" id="thumbs"></div>
+            </div>
+            <input id="images" type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/bmp" multiple hidden>
+          </div>
+
+          <div class="error" id="error" role="alert"></div>
+        </form>
+      </section>
+
+      <aside class="stage-wrap">
+        <div class="panel">
+          <div class="stage">
+            <div class="empty" id="empty">
+              <strong>Your video shows up here.</strong>
+              <span>One click searches stock, picks the best photos, and builds the film.</span>
+            </div>
+            <video id="player" controls playsinline></video>
+          </div>
+          <p class="status" id="status" aria-live="polite"></p>
+          <a class="download" id="download" href="#" download="video.mp4">Download video</a>
+          <a class="credits-link" id="credits" href="#" target="_blank" rel="noopener">Attribution record</a>
+        </div>
+      </aside>
+    </div>
+
+    <section class="seo" aria-label="About AI text to video studio">
+      <article>
+        <h2>AI text to video studio for kids, stories, and social</h2>
+        <p>AutoVideo Studio is an AI text to video and text to speech maker for parents, teachers, creators, marketers, and small businesses. Paste a kids story, educational script, entertainment idea, product description, or voiceover draft and get a ready MP4 with matching visuals, captions, narration, and motion.</p>
+        <p>Use it for children's entertainment videos, bedtime stories, classroom explainers, Instagram Reels, TikTok drafts, YouTube Shorts, Facebook ads, course intros, and landing-page demos — without a timeline editor.</p>
+      </article>
+
+      <article>
+        <h2>Kids entertainment and educational video creation</h2>
+        <p>Write a short story about animals, space, friendship, or school topics and turn it into a watchable kids video with on-screen text boxes and clear read-aloud narration. Teachers and parents can draft lesson intros, reading practice clips, and simple entertainment videos from plain text.</p>
+        <p>Search-friendly uses include kids video maker, children's story video, bedtime story video creator, educational video for children, and family entertainment video from text.</p>
+      </article>
+
+      <article>
+        <h2>How the script becomes a video</h2>
+        <ol>
+          <li>Your text is split by subjects, clauses, and short phrases — not only by sentence length.</li>
+          <li>Each shot gets a matching stock photo chosen for that subject.</li>
+          <li>Optional captions show the words in a box while text to speech reads the full script.</li>
+          <li>Pan, zoom, boom moves, and fades keep the cut visually active.</li>
+          <li>Download the MP4. Source credits stay available when stock media was used.</li>
+        </ol>
+        <p>Short scripts still produce a full video: visual subjects are expanded into multiple shots with different images.</p>
+      </article>
+
+      <article>
+        <h2>Features people search for</h2>
+        <ul>
+          <li><strong>AI text to video</strong> converter with automatic scene detection</li>
+          <li><strong>Text to speech video</strong> / TTS voiceover from the same script</li>
+          <li><strong>Video studio</strong> workflow for kids entertainment and story videos</li>
+          <li><strong>Captioned video maker</strong> with toggleable on-screen text boxes</li>
+          <li><strong>Stock photo video generator</strong> aligned to each subject</li>
+          <li><strong>Animated slideshow video</strong> with directional motion and punch-ins</li>
+          <li><strong>MP4 export</strong> for YouTube Shorts, Reels, TikTok, and classrooms</li>
+          <li>Optional personal image uploads when you already have brand or family photos</li>
+        </ul>
+      </article>
+
+      <article>
+        <h2>FAQ</h2>
+        <h3>Can short text still make a video?</h3>
+        <p>Yes. Even a short line is expanded by detected subjects so you get several images, not a single still.</p>
+        <h3>Can I make kids entertainment videos?</h3>
+        <p>Yes. Paste a children's story or educational script, keep captions and voiceover on, and export a simple entertainment or learning clip.</p>
+        <h3>How many images can one video use?</h3>
+        <p>Up to 25 images per video, so long scripts stay watchable and exports stay fast.</p>
+        <h3>Do I need editing skills?</h3>
+        <p>No. Write the words, press Create video, and download the result.</p>
+        <h3>What is this best for?</h3>
+        <p>Kids stories, classroom intros, marketing drafts, product teasers, lesson explainers, and social content built from written copy.</p>
+      </article>
+    </section>
+
+    <footer class="site-footer">
+      <p>AutoVideo Studio — AI text to video and text to speech for kids entertainment, stories, education, and marketing copy.</p>
+    </footer>
+  </main>
+
+  <script>
+    const form = document.querySelector("#form");
+    const text = document.querySelector("#text");
+    const title = document.querySelector("#title");
+    const fileInput = document.querySelector("#images");
+    const drop = document.querySelector("#drop");
+    const thumbs = document.querySelector("#thumbs");
+    const errorBox = document.querySelector("#error");
+    const statusBox = document.querySelector("#status");
+    const makeButton = document.querySelector("#make");
+    const player = document.querySelector("#player");
+    const empty = document.querySelector("#empty");
+    const download = document.querySelector("#download");
+    const credits = document.querySelector("#credits");
+    const pictures = [];
+
+    function showError(message) {
+      errorBox.style.display = message ? "block" : "none";
+      errorBox.textContent = message || "";
+    }
+
+    function renderThumbs() {
+      thumbs.replaceChildren();
+      pictures.forEach((file, index) => {
+        const item = document.createElement("div");
+        item.className = "thumb";
+        const image = document.createElement("img");
+        image.src = URL.createObjectURL(file);
+        image.alt = file.name;
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.textContent = "×";
+        remove.setAttribute("aria-label", `Remove ${file.name}`);
+        remove.addEventListener("click", () => {
+          URL.revokeObjectURL(image.src);
+          pictures.splice(index, 1);
+          renderThumbs();
+        });
+        item.append(image, remove);
+        thumbs.append(item);
+      });
+    }
+
+    function addFiles(fileList) {
+      for (const file of fileList) {
+        if (!file.type.startsWith("image/")) continue;
+        if (pictures.length >= 8) break;
+        pictures.push(file);
+      }
+      renderThumbs();
+    }
+
+    async function poll(id) {
+      const response = await fetch(`/api/jobs/${id}`);
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Lost track of the video.");
+      statusBox.textContent = data.message || "";
+      if (data.status === "done") {
+        player.src = `/videos/${id}`;
+        player.style.display = "block";
+        empty.style.display = "none";
+        download.style.display = "inline-block";
+        download.href = `/videos/${id}`;
+        credits.style.display = "inline-block";
+        credits.href = `/videos/${id}/attributions`;
+        makeButton.disabled = false;
+        player.play().catch(() => {});
+        return;
+      }
+      if (data.status === "error") throw new Error(data.error || "The video didn't finish.");
+      window.setTimeout(() => poll(id).catch(fail), 700);
+    }
+
+    function fail(error) {
+      makeButton.disabled = false;
+      statusBox.textContent = "";
+      showError(error.message || "Something went wrong.");
+    }
+
+    document.querySelector("#browse").addEventListener("click", () => fileInput.click());
+    fileInput.addEventListener("change", () => {
+      addFiles(fileInput.files);
+      fileInput.value = "";
+    });
+    drop.addEventListener("dragover", (event) => {
+      event.preventDefault();
+      drop.classList.add("over");
+    });
+    drop.addEventListener("dragleave", () => drop.classList.remove("over"));
+    drop.addEventListener("drop", (event) => {
+      event.preventDefault();
+      drop.classList.remove("over");
+      addFiles(event.dataTransfer.files);
+    });
+    document.querySelector("#example").addEventListener("click", () => {
+      title.value = "The paper boat";
+      text.value = "A small paper boat leaves the harbor at sunrise.\nIt passes a lighthouse, then a sleeping whale.\nIt reaches a city made of lanterns.\nBy night it knows the way home.";
+      text.focus();
+    });
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      showError("");
+      makeButton.disabled = true;
+      statusBox.textContent = "Starting…";
+      player.pause();
+      download.style.display = "none";
+      credits.style.display = "none";
+      try {
+        let response;
+        if (pictures.length) {
+          const body = new FormData();
+          body.set("text", text.value);
+          body.set("title", title.value);
+          body.set("use_stock", "off");
+          if (document.querySelector("#voice").checked) body.set("voice", "on");
+          if (document.querySelector("#captions").checked) body.set("captions", "on");
+          for (const file of pictures) body.append("images", file);
+          response = await fetch("/api/generate", { method: "POST", body });
+        } else {
+          response = await fetch("/api/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              text: text.value,
+              title: title.value,
+              voice: document.querySelector("#voice").checked,
+              captions: document.querySelector("#captions").checked,
+              use_stock: true,
+            }),
+          });
+        }
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Could not start the video.");
+        await poll(data.id);
+      } catch (error) {
+        fail(error);
+      }
+    });
+
+  </script>
+</body>
+</html>
